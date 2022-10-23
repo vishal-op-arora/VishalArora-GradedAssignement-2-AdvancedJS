@@ -6,6 +6,7 @@ let applicationIndex = 0;
 let candidates = 0;
 let currentApplication = null;
 let jsonDataLoaded = false;
+let applicationFound = false;
 // let hobbies = null;
 
 const resumeLandingPage = () => {
@@ -29,30 +30,14 @@ const resumeLandingPage = () => {
                     </tr>
                 </table>
                 <div id="resume-data">
-                    <table id="resumeHeading" style="width:100%">
-                        <tr >
-                            <td id="resume-title" style="width:80%"> </td>
-                            <td id="resume-image" style="width:20%"> </td>
-                        </tr>
-                    </table>
-
-                    <table id="resumePersonalWork" style="width:100%">
-                        <tr>
-                            <td style="width:25%; vertical-align: top;">
-                                <div id="resume-basic"> <div>
-                            </td>
-                            <td style="width:75%; vertical-align: top;">
-                                <div id="resume-work"> <div>
-                            </td>
-                        </tr>
-                        <br>
-                    </table>
+                    
                 </div>
             </div>
             
         `;
     
     readJSONFile();
+    
     
     // Previous Button
     document.getElementById('resumePreviousBtn').onclick = function () {
@@ -74,13 +59,16 @@ const resumeLandingPage = () => {
             for(let i = 0; i < jsonData.resume.length; i++ ){
                 if(jsonData.resume[i].basics.name === filterValue ){
                     currentApplication = jsonData.resume[i];
-                    buildResume();
-                }
-                else {
-                    noResultFound(filterValue);
+                    
+                    applicationFound = true;
                 }
             }
-            applicationIndex++;
+            if(applicationFound){
+                buildResume();
+                applicationFound = false;
+            } else {
+                noResultFound(filterValue);
+            }
             e.target.value = "";
     }
 
@@ -115,10 +103,7 @@ const readJSONFile = () => {
 };
 
 const noResultFound = (applicant) => {
-    document.getElementById('resume-title').innerHTML = "";
-    document.getElementById('resume-image').innerHTML = "";
-    document.getElementById('resume-basic').innerHTML = "";
-    document.getElementById('resume-work').innerHTML = `Applicant "${applicant}" not found.`;
+    document.getElementById('resume-data').innerHTML = ` <div id="dataNotFound">Applicant "${applicant}" not found. </div>`;
 }
 
 const initalResume = () => {
@@ -128,6 +113,28 @@ const initalResume = () => {
 }
 
 const buildResume = () => {
+
+    document.getElementById('resume-data').innerHTML = `
+        <table id="resumeHeading" style="width:100%">
+            <tr >
+                <td id="resume-title" style="width:80%"> </td>
+                <td id="resume-image" style="width:20%"> </td>
+            </tr>
+        </table>
+
+        <table id="resumePersonalWork" style="width:100%">
+            <tr>
+                <td style="width:25%; vertical-align: top;">
+                    <div id="resume-basic"> <div>
+                </td>
+                <td style="width:75%; vertical-align: top;">
+                    <div id="resume-work"> <div>
+                </td>
+            </tr>
+            <br>
+        </table>
+    
+    `;
 
     document.getElementById('resume-title').innerHTML = `
     <h1>${currentApplication.basics.name}</h1>
