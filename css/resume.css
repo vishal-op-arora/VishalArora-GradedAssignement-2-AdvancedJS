@@ -3,18 +3,10 @@
 #resume-page{
     display: grid;
     grid-template-columns: 1fr;
-    width: 80%;
-    margin: 5%;
+    width: 1100px;
+    margin: 2%;
 }
 
-
-#resumeheading{
-    background-color: lightgreen;
-}
-#search {
-    
-    width : 50%;
-}
 
 #resumeHead{
     display: inline-block;
@@ -42,27 +34,6 @@
     border-radius: 5px;
  }
 
- /* .resumeTemp{
-    display: block;
-    /* width: auto; */
-    /*width: 1200px;
-    margin :20px;
-    border: 2px solid black;
-    height: 800px
- } */
-
-.basic-work{
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    width : 900px;
-    /* margin: 2%;
-    display: flex;
-    border: 1px solid black;
-    width: 60% */
-    margin: 2% auto;
-    border-radius: 10px;
-}
-
 #resume-title,
 #resume-image 
 {
@@ -76,37 +47,35 @@
 #resume-title > h3 {
     margin: 10px;
 }
-#resume-basic{
-    background-color: pink;
-}
 
 .basic-title {
     font-size: larger;
+    font-weight: bolder;
     display: block;
     background-color: gray;
-    margin-top: 5px;
-    margin-bottom: 5px;
+    padding: 5px;
+    padding-left: 20px;
 }
 .basic-info {
     text-align: right;
-    margin-right: 15px;
+    padding-right: 20px;
 }
-
 
 .work-title{
     font-weight: bold;
     font-size: x-large;
-    margin: 10px;
+    padding: 15px;
 }
 
 .work-subtitle{
     font-weight: bold;
-    margin-left: 20px;
+    padding-left: 20px;
+    display: inline-block;
     text-align: right;
 }
 .work-info > ul {
     display: block;
-    margin-left: 40px;
+    padding-left: 20px;
 }
 
 .input-field-resume {
@@ -120,3 +89,31 @@
     height: 100%
 }
 
+table, th, td {
+    border-spacing:0px
+}
+
+.work-info ul li span {
+    position : relative;
+    left : -20px;
+}
+
+.work-info ul li{
+    margin-left: 20px;
+}
+
+#resumePersonalWork tr td:first-child{
+    background-color: pink;
+    padding: 5px;
+}
+
+#resume-data{
+    border: 2px solid gray;
+    border-radius: 5px;
+    box-shadow: 5px 5px 5px 5px gray;
+    margin-top: 10px;
+}
+#resumePersonalWork tr td:last-child{
+    padding: 5px;
+    padding-top: 0px ;
+}

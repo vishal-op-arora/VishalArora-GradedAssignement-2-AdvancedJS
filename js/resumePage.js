@@ -13,7 +13,7 @@ const resumeLandingPage = () => {
     document.getElementById('body').innerHTML = 
         `
             <div id = "resume-page">
-                <table style="width:80%">
+                <table style="width:100%">
                     <tr>
                         <td style="width:20%">
                             <button type="button" id="resumePreviousBtn" class="login-btn btn" onclick="previousResume()" >Previous</button>
@@ -28,25 +28,26 @@ const resumeLandingPage = () => {
                         </td>
                     </tr>
                 </table>
+                <div id="resume-data">
+                    <table id="resumeHeading" style="width:100%">
+                        <tr >
+                            <td id="resume-title" style="width:80%"> </td>
+                            <td id="resume-image" style="width:20%"> </td>
+                        </tr>
+                    </table>
 
-                <table id="resumeHeading" style="width:80%">
-                    <tr >
-                        <td id="resume-title" style="width:80%"> </td>
-                        <td id="resume-image" style="width:20%"> </td>
-                    </tr>
-                </table>
-
-                <table id="resumePersonalWork" style="width:80%">
-                    <tr>
-                        <td style="width:25%; vertical-align: top;">
-                            <div id="resume-basic"> <div>
-                        </td>
-                        <td  style="width:75%; vertical-align: top;">
-                            <div id="resume-work"> <div>
-                        </td>
-                    </tr>
-                </table>
-                
+                    <table id="resumePersonalWork" style="width:100%">
+                        <tr>
+                            <td style="width:25%; vertical-align: top;">
+                                <div id="resume-basic"> <div>
+                            </td>
+                            <td style="width:75%; vertical-align: top;">
+                                <div id="resume-work"> <div>
+                            </td>
+                        </tr>
+                        <br>
+                    </table>
+                </div>
             </div>
             
         `;
@@ -172,41 +173,47 @@ const buildResume = () => {
             <div class="work-title">Work Experience in previous company</div>
             <div class="work-info">
         
-                <span class="work-subtitle">Company Name : </span>${currentApplication.work["Company Name"]}<br>
-                <span class="work-subtitle">Position : </span>${currentApplication.work.Position}<br>
-                <span class="work-subtitle">Start Date : </span>${currentApplication.work["Start Date"]}<br>
-                <span class="work-subtitle">End Date : </span>${currentApplication.work["End Date"]}<br>
-                <span class="work-subtitle">Summary : </span>${currentApplication.work.Summary}<br>
+                <span class="work-subtitle">Company Name : </span> <span> ${currentApplication.work["Company Name"]}</span><br>
+                <span class="work-subtitle">Position : </span><span> ${currentApplication.work.Position}</span><br>
+                <span class="work-subtitle">Start Date : </span><span> ${currentApplication.work["Start Date"]}</span><br>
+                <span class="work-subtitle">End Date : </span><span> ${currentApplication.work["End Date"]}</span><br>
+                <span class="work-subtitle">Summary : </span><span> ${currentApplication.work.Summary}</span><br>
             
             </div>
 
             <div class="work-title">Projects</div>
             <div class="work-info">
-                <span class="work-subtitle">${currentApplication.projects.name}</span> : ${currentApplication.projects.description}<br>
+                <span class="work-subtitle">${currentApplication.projects.name} : </span> <span>${currentApplication.projects.description}</span><br>
             </div>
 
             <div class="work-title">Education</div>
             <div class="work-info">
                 <ul>
                     <li> 
-                        <span class="work-subtitle">UG : </span> 
-                        ${currentApplication.education.UG.institute},
-                        ${currentApplication.education.UG.course}, 
-                        ${currentApplication.education.UG["Start Date"]} -
-                        ${currentApplication.education.UG["End Date"]}, 
-                        ${currentApplication.education.UG.cgpa} CGPA
+                        <span class="work-subtitle">UG : </span>
+                        <span>
+                            ${currentApplication.education.UG.institute},
+                            ${currentApplication.education.UG.course}, 
+                            ${currentApplication.education.UG["Start Date"]} -
+                            ${currentApplication.education.UG["End Date"]}, 
+                            ${currentApplication.education.UG.cgpa} CGPA
+                        </span>
                     </li>
 
                     <li>
                         <span class="work-subtitle">Senior Secondary : </span>
-                        ${currentApplication.education["Senior Secondary"].institute}, 
-                        ${currentApplication.education["Senior Secondary"].cgpa} CGPA
+                        <span>
+                            ${currentApplication.education["Senior Secondary"].institute}, 
+                            ${currentApplication.education["Senior Secondary"].cgpa} CGPA
+                        </span>
                     </li>
                     
                     <li>
                         <span class="work-subtitle">High School : </span>
-                        ${currentApplication.education["High School"].institute}, 
-                        ${currentApplication.education["High School"].cgpa} CGPA
+                        <span>
+                            ${currentApplication.education["High School"].institute}, 
+                            ${currentApplication.education["High School"].cgpa} CGPA
+                        </span>
                     </li>
 
                 </ul>
@@ -217,11 +224,11 @@ const buildResume = () => {
             <div class="work-title">Internship</div>
             <div class="work-info">
                 <ul>
-                    <li><span class="work-subtitle">Company Name : </span>${currentApplication.Internship["Company Name"]}</li> 
-                    <li><span class="work-subtitle">Position : </span>${currentApplication.Internship.Position}</li> 
-                    <li><span class="work-subtitle">Start Date : </span>${currentApplication.Internship["Start Date"]}</li> 
-                    <li><span class="work-subtitle">End Date : </span>${currentApplication.Internship["End Date"]}</li> 
-                    <li><span class="work-subtitle">Summary : </span>${currentApplication.Internship.Summary}</li>
+                    <li><span class="work-subtitle">Company Name : </span> <span> ${currentApplication.Internship["Company Name"]}</span></li> 
+                    <li><span class="work-subtitle">Position : </span><span> ${currentApplication.Internship.Position}</span></li> 
+                    <li><span class="work-subtitle">Start Date : </span><span> ${currentApplication.Internship["Start Date"]}</span></li> 
+                    <li><span class="work-subtitle">End Date : </span><span> ${currentApplication.Internship["End Date"]}</span></li> 
+                    <li><span class="work-subtitle">Summary : </span><span> ${currentApplication.Internship.Summary}</span></li>
             </div>
 
             <div class="work-title">Achievements</div>
@@ -229,6 +236,7 @@ const buildResume = () => {
                 <ul>
                     <div id="achievements"> </div>
                 </ul>
+                <br>
             </div>
 
     `; 
