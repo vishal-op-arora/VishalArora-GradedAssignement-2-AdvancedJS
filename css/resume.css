@@ -120,9 +120,11 @@ table, th, td {
 
 #dataNotFound {
     display: grid;
+    grid-template-columns: 1fr;
     font-weight: bold;
     font-style: italic;
-    text-align: center;
-    padding: 10%;
-
+    text-align: left; 
+    padding: 0%;
+    margin: 10%;
+    margin-left: 42%;
 }

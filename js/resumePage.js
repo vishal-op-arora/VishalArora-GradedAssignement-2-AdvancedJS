@@ -9,7 +9,7 @@ let jsonDataLoaded = false;
 let applicationFound = false;
 // let hobbies = null;
 
-const resumeLandingPage = () => {
+const resumeLandingPage = () =>  {
 
     document.getElementById('body').innerHTML = 
         `
@@ -38,6 +38,7 @@ const resumeLandingPage = () => {
     
     readJSONFile();
     
+    setTimeout(initalResume, 500);
     
     // Previous Button
     document.getElementById('resumePreviousBtn').onclick = function () {
@@ -59,7 +60,6 @@ const resumeLandingPage = () => {
             for(let i = 0; i < jsonData.resume.length; i++ ){
                 if(jsonData.resume[i].basics.name === filterValue ){
                     currentApplication = jsonData.resume[i];
-                    
                     applicationFound = true;
                 }
             }
@@ -100,15 +100,16 @@ const readJSONFile = () => {
                 console.log("inside ResumePage", jsonData);
             })
             .catch( (error) => console.log(error.message) );
+
 };
 
 const noResultFound = (applicant) => {
-    document.getElementById('resume-data').innerHTML = ` <div id="dataNotFound">Applicant "${applicant}" not found. </div>`;
+    document.getElementById('resume-data').innerHTML = ` <div id="dataNotFound"> <img src="../img/sad-face.svg" width=100px height=100px> <br>No such result found. </div>`;
 }
 
 const initalResume = () => {
-
-    applicationIndex = 0;
+    currentApplication = jsonData.resume[applicationIndex];
+    console.log(currentApplication);
     buildResume();
 }
 
@@ -143,7 +144,7 @@ const buildResume = () => {
     `;
 
     document.getElementById('resume-image').innerHTML = `
-    <img src="../img/person-logo.png" width=100px height=100px>
+    <img src="../img/person-circle.svg" width=120px height=120px>
     `;
 
 
