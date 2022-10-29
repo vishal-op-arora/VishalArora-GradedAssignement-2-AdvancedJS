@@ -74,7 +74,7 @@ const resumeLandingPage = () =>  {
             }
 
             console.log(applicationIndex);
-            
+
             switch(applicationIndex) {
 
                 case 0 :
@@ -174,14 +174,15 @@ const buildResume = () => {
     document.getElementById('resume-basic').innerHTML = `  
         <div class="basic-title">Personal Information</div>
         <div class="basic-info">
-            ${currentApplication.basics.phone}<br>
-            ${currentApplication.basics.email}<br>
+            <b>Mob. </b>${currentApplication.basics.phone}<br>
+            <b>eMail. </b>${currentApplication.basics.email}<br>
             <a href=${currentApplication.basics.profiles.url}> 
                 ${currentApplication.basics.profiles.network}
             </a> <br>
-            ${currentApplication.basics.location.address}<br>
-            Pincode ${currentApplication.basics.location.postalCode}<br>
-            ${currentApplication.basics.location.city}<br>
+            <br>
+            <b>Address. </b>#${currentApplication.basics.location.address},<br>
+            Pincode - ${currentApplication.basics.location.postalCode},<br>
+            ${currentApplication.basics.location.city}, 
             ${currentApplication.basics.location.state}<br>
         </div>
         <br>
@@ -283,8 +284,7 @@ const buildResume = () => {
         }
         document.getElementById("technical-skills").innerHTML = techElement;
     }
-    displayTechnicalSkills();
-
+    
     const displayHobbies = () => {
         
         let hobbiesElement = "";
@@ -295,8 +295,7 @@ const buildResume = () => {
         }
         document.getElementById("hobbies").innerHTML = hobbiesElement;
     }
-    displayHobbies();
-
+    
     const achievements = () => {
         
         let achievementsElement = "";
@@ -307,6 +306,9 @@ const buildResume = () => {
         }
         document.getElementById("achievements").innerHTML = achievementsElement;
     }
+
+    displayTechnicalSkills();
+    displayHobbies();
     achievements();
 }
 
