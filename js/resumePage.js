@@ -17,7 +17,7 @@ const resumeLandingPage = () =>  {
                 <table style="width:100%">
                     <tr>
                         <td style="width:20%">
-                            <button type="button" id="resumePreviousBtn" class="login-btn btn" onclick="previousResume()" >Previous</button>
+                            <button type="button" id="resumePreviousBtn" class="login-btn btn" onclick="previousResume()" hidden>Previous</button>
                         </td>
 
                         <td style="width:60%">
@@ -25,7 +25,7 @@ const resumeLandingPage = () =>  {
                         </td>
 
                         <td style="width:20%">
-                        <button type="button"id="resumeNextBtn" type="submit" class="login-btn btn">Next</button>
+                        <button type="button" id="resumeNextBtn" type="submit" class="login-btn btn">Next</button>
                         </td>
                     </tr>
                 </table>
@@ -42,13 +42,14 @@ const resumeLandingPage = () =>  {
     
     // Previous Button
     document.getElementById('resumePreviousBtn').onclick = function () {
+        applicationIndex--;
+
         if ( applicationIndex === 0 ){
-            applicationIndex = candidates - 1;
+            document.getElementById('resumePreviousBtn').setAttribute("hidden", "hidden");
         }
-        else {
-            applicationIndex--;
+        if( applicationIndex > 0 ){
+            document.getElementById('resumeNextBtn').removeAttribute("hidden")
         }
-        console.log(jsonData.resume[applicationIndex]);
         currentApplication = jsonData.resume[applicationIndex];
         buildResume();
     };
@@ -57,30 +58,52 @@ const resumeLandingPage = () =>  {
     document.getElementById('resumeFilterField').onchange = function (e){
         const filterValue = e.target.value;
 
-            for(let i = 0; i < jsonData.resume.length; i++ ){
-                if(jsonData.resume[i].basics.name === filterValue ){
+            for( let i = 0; i < jsonData.resume.length; i++ ){
+                if(jsonData.resume[i].basics.name.toLowerCase() === filterValue.toLowerCase() ){
                     currentApplication = jsonData.resume[i];
                     applicationFound = true;
+                    applicationIndex = i;
+                    break;
                 }
             }
-            if(applicationFound){
+            if( applicationFound ){
                 buildResume();
                 applicationFound = false;
             } else {
                 noResultFound(filterValue);
             }
+
+            console.log(applicationIndex);
+            
+            switch(applicationIndex) {
+
+                case 0 :
+                    document.getElementById('resumePreviousBtn').setAttribute("hidden", "hidden");
+                    break;
+                
+                case candidates - 1 :
+                    document.getElementById('resumeNextBtn').setAttribute("hidden", "hidden");
+                    break;
+
+                default :
+                    document.getElementById('resumePreviousBtn').removeAttribute("hidden")
+                    document.getElementById('resumeNextBtn').removeAttribute("hidden")
+            }
+            
             e.target.value = "";
     }
 
     // Next Button
     document.getElementById('resumeNextBtn').onclick = function (){
+        applicationIndex++;
+        
         if ( applicationIndex === (candidates - 1) ){
-            applicationIndex = 0;
+            document.getElementById('resumeNextBtn').setAttribute("hidden", "hidden");
         }
-        else {
-            applicationIndex++;
+
+        if( applicationIndex > 0){
+            document.getElementById('resumePreviousBtn').removeAttribute("hidden")
         }
-        console.log(jsonData.resume[applicationIndex]);
         currentApplication = jsonData.resume[applicationIndex];
         buildResume();
     };
@@ -97,7 +120,7 @@ const readJSONFile = () => {
                 jsonData = jData;
                 candidates = jsonData.resume.length;
                 jsonDataLoaded = true;
-                console.log("inside ResumePage", jsonData);
+                //console.log("inside ResumePage", jsonData);
             })
             .catch( (error) => console.log(error.message) );
 
