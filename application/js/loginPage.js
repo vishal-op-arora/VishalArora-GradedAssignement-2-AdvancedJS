@@ -9,6 +9,8 @@ function displaySignUpPage () {
     document.getElementById("sigup-btn2").style.cssText = "display : inline";
     document.getElementById("login-btn2").style.cssText = "display : none";
     document.querySelector(".signup-container").style.cssText = "background: rgb(28, 139, 106);";
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
 }
 
 function displayLoginPage () {
@@ -19,23 +21,25 @@ function displayLoginPage () {
     document.getElementById("sigup-btn2").style.cssText = "display : none";
     document.getElementById("login-btn2").style.cssText = "display : inline";
     document.querySelector(".signup-container").style.cssText = "background: rgb(56, 102, 189);";
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
 }
 
 function sigupUser () {
     let username = document.getElementById("username").value ;
     let password = document.getElementById("password").value ;
     if( username === "" || password === ""){
-        alert("Username or Password can't be empty.\nPlease retry.")
+        alert("Username or Password can't be empty.")
         document.getElementById("username").value = "";
         document.getElementById("password").value = "";
-    } else{
+    } else {
         LoginCredentials.setUsername(username);
         LoginCredentials.setPassword(password);
         alert("Signup Successful. ")
         document.getElementById("username").value = "";
         document.getElementById("password").value = "";
+        displayLoginPage();
     }
-    displayLoginPage();
 }
 
 function loginUser (){

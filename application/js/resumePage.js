@@ -1,8 +1,8 @@
-import { JSON_SERVER_URL } from './constants.js';
+import { JSON_SERVER_URL as JSON_SERVER_BASE_URL } from './constants.js';
 
 let jsonData = new Object();
 let jsonDataForRef = new Object();
-let applicationIndex = 0;
+let applicationID = 1;
 let candidates = 0;
 let currentApplication = null;
 let applicationFound = false;
@@ -43,20 +43,21 @@ const resumeLandingPage = () =>  {
         `;
     
     getAPI();
-    setTimeout(initalResume, 500);
+    initalResume();
     
     // Previous Button
-    document.getElementById('resumePreviousBtn').onclick = function () {
+    document.getElementById('resumePreviousBtn').onclick = async function () {
         
-        applicationIndex--;
+        applicationID--;
 
-        if ( applicationIndex === 0 ){
+        if ( applicationID === 1 ){
             document.getElementById('resumePreviousBtn').setAttribute("hidden", "hidden");
         }
-        if( applicationIndex > 0 ){
+        if( applicationID > 1 ){
             document.getElementById('resumeNextBtn').removeAttribute("hidden")
         }
-        currentApplication = jsonData[applicationIndex];
+        console.log("Previous -> " + applicationID + " --> " + candidates);
+        currentApplication = await getResumeById(applicationID);
         buildResume();
     };
 
@@ -64,12 +65,13 @@ const resumeLandingPage = () =>  {
     document.getElementById('resumeFilterField').onchange = function (event){
 
         const filterValue = event.target.value;
-
-        for( let i = 0; i < jsonData.length; i++ ){
+       
+        for( let i = 0; i < candidates; i++ ){
             if(jsonData[i].basics.name.toLowerCase() === filterValue.toLowerCase() ){
                 currentApplication = jsonData[i];
                 applicationFound = true;
-                applicationIndex = i;
+                applicationID = i+1;
+                console.log(applicationID);
                 break;
             }
         }
@@ -80,9 +82,9 @@ const resumeLandingPage = () =>  {
             noResultFound(filterValue);
         }
 
-        console.log(applicationIndex);
+        console.log(applicationID);
 
-        switch(applicationIndex) {
+        switch(applicationID) {
 
             case 0 :
                 document.getElementById('resumePreviousBtn').setAttribute("hidden", "hidden");
@@ -101,17 +103,19 @@ const resumeLandingPage = () =>  {
     }
 
     // Next Button
-    document.getElementById('resumeNextBtn').onclick = function (){
-        applicationIndex++;
+    document.getElementById('resumeNextBtn').onclick = async function (){
         
-        if ( applicationIndex === (candidates - 1) ){
+        applicationID++;
+        
+        if ( applicationID === candidates ){
             document.getElementById('resumeNextBtn').setAttribute("hidden", "hidden");
         }
 
-        if( applicationIndex > 0){
+        if( applicationID > 0){
             document.getElementById('resumePreviousBtn').removeAttribute("hidden")
         }
-        currentApplication = jsonData[applicationIndex];
+        console.log("Next -> " + applicationID + " --> " + candidates);
+        currentApplication = await getResumeById(applicationID);
         buildResume();
     };
 
@@ -131,7 +135,7 @@ const resumeLandingPage = () =>  {
 
 const getAPI = () => {
 
-    fetch( JSON_SERVER_URL )
+    fetch( JSON_SERVER_BASE_URL )
             .then( response => {
                 return response.json();
             })
@@ -140,18 +144,54 @@ const getAPI = () => {
                 jsonDataForRef = jData;
                 candidates = jsonData.length;
                 jsonDataLoaded = true;
-                console.log("get API inside ResumePage", jData);
+                //console.log("get API inside ResumePage", jData);
             })
             .catch( (error) => console.log(error.message) );
 
 };
 
-const noResultFound = (applicant) => {
-    document.getElementById('resume-data').innerHTML = ` <div id="dataNotFound"> <img src="../../application/img/sad-face.svg" width=100px height=100px> <br>No such result found. </div>`;
+
+const getApplicantByApplierFor = (appliedFor) => {
+
+    jsonData = null;
+
+    fetch( JSON_SERVER_BASE_URL )
+            .then( response => {
+                return response.json();
+            })
+            .then(jData => {
+                jData.map((data) => {
+                    if(data.basics.AppliedFor.toLowerCase() === appliedFor.toLowerCase()){
+                        jsonData.push(data);
+                    }
+                } );
+                console.log(jsonData);
+                jsonData = jData;
+                jsonDataForRef = jData;
+                candidates = jsonData.length;
+                jsonDataLoaded = true;
+                //console.log("get API inside ResumePage", jData);
+            })
+            .catch( (error) => console.log(error.message) );
+
+};
+
+async function getResumeById (id) {
+    var resumeByIdUrl = JSON_SERVER_BASE_URL + '/' + id;
+    const response = await fetch( resumeByIdUrl);    
+    return await response.json();
+};
+
+const noResultFound = () => {
+    document.getElementById('resume-data').innerHTML = ` 
+    <div id="dataNotFound"> 
+        <img src="../../application/img/sad-face.svg" width=100px height=100px> 
+        <br>No such result found. 
+    </div>`;
 }
 
-const initalResume = () => {
-    currentApplication = jsonData[applicationIndex];
+const initalResume = async () => {
+    currentApplication = await getResumeById(applicationID);
     buildResume();
 }
 
@@ -185,12 +225,91 @@ const buildResume = () => {
     <h3>Applied For ${currentApplication.basics.AppliedFor} </h3>
     `;
 
-    document.getElementById('resume-image').innerHTML = `
-    <img src="../../application/img/person-circle.svg" width=120px height=120px>
+    document.getElementById('resume-image').innerHTML = `<img src="../../application/img/person-circle.svg" width=120px height=120px>`;
+    document.getElementById('resume-basic').innerHTML = getPersonalInformation();  
+    document.getElementById('resume-work').innerHTML = getWorkExperience();
+    document.getElementById("technical-skills").innerHTML  = getTechnicalSkills();
+    document.getElementById("achievements").innerHTML = getHobbies();
+    document.getElementById("hobbies").innerHTML = getAchievements();
+}
+
+const getWorkExperience = () => {
+    return `
+
+    <div class="work-title">Work Experience in previous company</div>
+    <div class="work-info">
+
+        <span class="work-subtitle">Company Name : </span> <span> ${currentApplication.work["Company Name"]}</span><br>
+        <span class="work-subtitle">Position : </span><span> ${currentApplication.work.Position}</span><br>
+        <span class="work-subtitle">Start Date : </span><span> ${currentApplication.work["Start Date"]}</span><br>
+        <span class="work-subtitle">End Date : </span><span> ${currentApplication.work["End Date"]}</span><br>
+        <span class="work-subtitle">Summary : </span><span> ${currentApplication.work.Summary}</span><br>
+    
+    </div>
+
+    <div class="work-title">Projects</div>
+    <div class="work-info">
+        <span class="work-subtitle">${currentApplication.projects.name} : </span> <span>${currentApplication.projects.description}</span><br>
+    </div>
+
+    <div class="work-title">Education</div>
+    <div class="work-info">
+        <ul>
+            <li> 
+                <span class="work-subtitle">UG : </span>
+                <span>
+                    ${currentApplication.education.UG.institute},
+                    ${currentApplication.education.UG.course}, 
+                    ${currentApplication.education.UG["Start Date"]} -
+                    ${currentApplication.education.UG["End Date"]}, 
+                    ${currentApplication.education.UG.cgpa} CGPA
+                </span>
+            </li>
+
+            <li>
+                <span class="work-subtitle">Senior Secondary : </span>
+                <span>
+                    ${currentApplication.education["Senior Secondary"].institute}, 
+                    ${currentApplication.education["Senior Secondary"].cgpa} CGPA
+                </span>
+            </li>
+            
+            <li>
+                <span class="work-subtitle">High School : </span>
+                <span>
+                    ${currentApplication.education["High School"].institute}, 
+                    ${currentApplication.education["High School"].cgpa} CGPA
+                </span>
+            </li>
+
+        </ul>
+        
+        <br>
+    </div>
+
+    <div class="work-title">Internship</div>
+    <div class="work-info">
+        <ul>
+            <li><span class="work-subtitle">Company Name : </span> <span> ${currentApplication.Internship["Company Name"]}</span></li> 
+            <li><span class="work-subtitle">Position : </span><span> ${currentApplication.Internship.Position}</span></li> 
+            <li><span class="work-subtitle">Start Date : </span><span> ${currentApplication.Internship["Start Date"]}</span></li> 
+            <li><span class="work-subtitle">End Date : </span><span> ${currentApplication.Internship["End Date"]}</span></li> 
+            <li><span class="work-subtitle">Summary : </span><span> ${currentApplication.Internship.Summary}</span></li>
+    </div>
+
+    <div class="work-title">Achievements</div>
+    <div class="work-info">
+        <ul>
+            <div id="achievements"> </div>
+        </ul>
+        <br>
+    </div>
+
     `;
+}
 
-
-    document.getElementById('resume-basic').innerHTML = `  
+const getPersonalInformation = () => {
+    return `  
         <div class="basic-title">Personal Information</div>
         <div class="basic-info">
             <b>Mob. </b>${currentApplication.basics.phone}<br>
@@ -218,117 +337,42 @@ const buildResume = () => {
         </div>
         <br>
     `;
+}
 
-    document.getElementById('resume-work').innerHTML = `
-
-            <div class="work-title">Work Experience in previous company</div>
-            <div class="work-info">
+const getTechnicalSkills = () => {
         
-                <span class="work-subtitle">Company Name : </span> <span> ${currentApplication.work["Company Name"]}</span><br>
-                <span class="work-subtitle">Position : </span><span> ${currentApplication.work.Position}</span><br>
-                <span class="work-subtitle">Start Date : </span><span> ${currentApplication.work["Start Date"]}</span><br>
-                <span class="work-subtitle">End Date : </span><span> ${currentApplication.work["End Date"]}</span><br>
-                <span class="work-subtitle">Summary : </span><span> ${currentApplication.work.Summary}</span><br>
-            
-            </div>
-
-            <div class="work-title">Projects</div>
-            <div class="work-info">
-                <span class="work-subtitle">${currentApplication.projects.name} : </span> <span>${currentApplication.projects.description}</span><br>
-            </div>
-
-            <div class="work-title">Education</div>
-            <div class="work-info">
-                <ul>
-                    <li> 
-                        <span class="work-subtitle">UG : </span>
-                        <span>
-                            ${currentApplication.education.UG.institute},
-                            ${currentApplication.education.UG.course}, 
-                            ${currentApplication.education.UG["Start Date"]} -
-                            ${currentApplication.education.UG["End Date"]}, 
-                            ${currentApplication.education.UG.cgpa} CGPA
-                        </span>
-                    </li>
-
-                    <li>
-                        <span class="work-subtitle">Senior Secondary : </span>
-                        <span>
-                            ${currentApplication.education["Senior Secondary"].institute}, 
-                            ${currentApplication.education["Senior Secondary"].cgpa} CGPA
-                        </span>
-                    </li>
-                    
-                    <li>
-                        <span class="work-subtitle">High School : </span>
-                        <span>
-                            ${currentApplication.education["High School"].institute}, 
-                            ${currentApplication.education["High School"].cgpa} CGPA
-                        </span>
-                    </li>
-
-                </ul>
-                
-                <br>
-            </div>
-
-            <div class="work-title">Internship</div>
-            <div class="work-info">
-                <ul>
-                    <li><span class="work-subtitle">Company Name : </span> <span> ${currentApplication.Internship["Company Name"]}</span></li> 
-                    <li><span class="work-subtitle">Position : </span><span> ${currentApplication.Internship.Position}</span></li> 
-                    <li><span class="work-subtitle">Start Date : </span><span> ${currentApplication.Internship["Start Date"]}</span></li> 
-                    <li><span class="work-subtitle">End Date : </span><span> ${currentApplication.Internship["End Date"]}</span></li> 
-                    <li><span class="work-subtitle">Summary : </span><span> ${currentApplication.Internship.Summary}</span></li>
-            </div>
-
-            <div class="work-title">Achievements</div>
-            <div class="work-info">
-                <ul>
-                    <div id="achievements"> </div>
-                </ul>
-                <br>
-            </div>
-
-    `; 
-
-    
-    const displayTechnicalSkills = () => {
-        
-        let techElement = "";
-        let techSkills = currentApplication.skills.keywords;
-        let techSkillsCount = currentApplication.skills.keywords.length
-        for(let i = 0; i < techSkillsCount; i++){
-            techElement = techElement + `${techSkills[i]}<br>`;
-        }
-        document.getElementById("technical-skills").innerHTML = techElement;
-    }
-    
-    const displayHobbies = () => {
-        
-        let hobbiesElement = "";
-        let hobbies = currentApplication.interests.hobbies;
-        let hobbiesCount = currentApplication.interests.hobbies.length
-        for(let i = 0; i < hobbiesCount; i++){
-            hobbiesElement = hobbiesElement + `${hobbies[i]}<br>`;
-        }
-        document.getElementById("hobbies").innerHTML = hobbiesElement;
-    }
-    
-    const achievements = () => {
-        
-        let achievementsElement = "";
-        let achievements = currentApplication.achievements.Summary;
-        let achievementsCount = currentApplication.achievements.Summary.length
-        for(let i = 0; i < achievementsCount; i++){
-            achievementsElement = achievementsElement + `<li>${achievements[i]}</li>`;
-        }
-        document.getElementById("achievements").innerHTML = achievementsElement;
+    let techElement = "";
+    let techSkills = currentApplication.skills.keywords;
+    let techSkillsCount = currentApplication.skills.keywords.length
+    for(let i = 0; i < techSkillsCount; i++){
+        techElement = techElement + `${techSkills[i]}<br>`;
     }
 
-    displayTechnicalSkills();
-    displayHobbies();
-    achievements();
+    return  techElement;
+}
+
+const getAchievements = () => {
+        
+    let achievementsElement = "";
+    let achievements = currentApplication.achievements.Summary;
+    let achievementsCount = currentApplication.achievements.Summary.length
+    for(let i = 0; i < achievementsCount; i++){
+        achievementsElement = achievementsElement + `<li>${achievements[i]}</li>`;
+    }
+
+    return achievementsElement;
+}
+
+const getHobbies = () => {
+        
+    let hobbiesElement = "";
+    let hobbies = currentApplication.interests.hobbies;
+    let hobbiesCount = currentApplication.interests.hobbies.length;
+    for(let i = 0; i < hobbiesCount; i++){
+        hobbiesElement = hobbiesElement + `${hobbies[i]}<br>`;
+    }
+
+    return hobbiesElement;
 }
 
 export { resumeLandingPage };
