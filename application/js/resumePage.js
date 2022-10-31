@@ -1,13 +1,12 @@
 import { JSON_SERVER_URL as JSON_SERVER_BASE_URL } from './constants.js';
 
-let jsonData = new Object();
-let jsonDataForRef = new Object();
-let applicationID = 1;
+let resumeIndex = 1;
 let candidates = 0;
 let currentApplication = null;
 let applicationFound = false;
 let searchBy = true;
-// let hobbies = null;
+let resumes = [];
+
 
 const resumeLandingPage = () =>  {
 
@@ -42,22 +41,15 @@ const resumeLandingPage = () =>  {
             
         `;
     
-    getAPI();
     initalResume();
     
     // Previous Button
     document.getElementById('resumePreviousBtn').onclick = async function () {
         
-        applicationID--;
-
-        if ( applicationID === 1 ){
-            document.getElementById('resumePreviousBtn').setAttribute("hidden", "hidden");
-        }
-        if( applicationID > 1 ){
-            document.getElementById('resumeNextBtn').removeAttribute("hidden")
-        }
-        console.log("Previous -> " + applicationID + " --> " + candidates);
-        currentApplication = await getResumeById(applicationID);
+        resumeIndex--;
+        previousButton();
+        nextButton();
+        currentApplication = getResumeByIndex(resumeIndex);
         buildResume();
     };
 
@@ -66,15 +58,18 @@ const resumeLandingPage = () =>  {
 
         const filterValue = event.target.value;
        
-        for( let i = 0; i < candidates; i++ ){
-            if(jsonData[i].basics.name.toLowerCase() === filterValue.toLowerCase() ){
-                currentApplication = jsonData[i];
+        for( let i = 0; i < resumes.length; i++ ){
+            if(getResumeByIndex(i).basics.name.toLowerCase() === filterValue.toLowerCase() ){
+                currentApplication = getResumeByIndex(i);
                 applicationFound = true;
-                applicationID = i+1;
-                console.log(applicationID);
+                resumeIndex = i;
+                console.log(resumeIndex);
                 break;
             }
         }
+        previousButton();
+        nextButton();
+
         if( applicationFound ){
             buildResume();
             applicationFound = false;
@@ -82,40 +77,19 @@ const resumeLandingPage = () =>  {
             noResultFound(filterValue);
         }
 
-        console.log(applicationID);
-
-        switch(applicationID) {
-
-            case 0 :
-                document.getElementById('resumePreviousBtn').setAttribute("hidden", "hidden");
-                break;
-            
-            case candidates - 1 :
-                document.getElementById('resumeNextBtn').setAttribute("hidden", "hidden");
-                break;
-
-            default :
-                document.getElementById('resumePreviousBtn').removeAttribute("hidden")
-                document.getElementById('resumeNextBtn').removeAttribute("hidden")
-        }
+        console.log(resumeIndex);
         
         event.target.value = "";
     }
 
     // Next Button
     document.getElementById('resumeNextBtn').onclick = async function (){
-        
-        applicationID++;
-        
-        if ( applicationID === candidates ){
-            document.getElementById('resumeNextBtn').setAttribute("hidden", "hidden");
-        }
-
-        if( applicationID > 0){
-            document.getElementById('resumePreviousBtn').removeAttribute("hidden")
-        }
-        console.log("Next -> " + applicationID + " --> " + candidates);
-        currentApplication = await getResumeById(applicationID);
+        console.log(resumes);
+        resumeIndex++;
+        previousButton();
+        nextButton();
+        console.log(getResumeByIndex(resumeIndex));
+        currentApplication = getResumeByIndex(resumeIndex);
         buildResume();
     };
 
@@ -133,54 +107,45 @@ const resumeLandingPage = () =>  {
 
 }
 
+
+const previousButton = () => {
+    if ( resumeIndex === 0 ){
+        document.getElementById('resumePreviousBtn').setAttribute("hidden", "hidden");
+    } else {
+        document.getElementById('resumePreviousBtn').removeAttribute("hidden");
+    }
+}
+
+const nextButton = ( ) => {
+    if ( resumeIndex === (resumes.length - 1) ){
+        document.getElementById('resumeNextBtn').setAttribute("hidden", "hidden");
+    } else {
+        document.getElementById('resumeNextBtn').removeAttribute("hidden");
+    }
+}
+
 const getAPI = () => {
-
     fetch( JSON_SERVER_BASE_URL )
             .then( response => {
                 return response.json();
             })
             .then(jData => {
-                jsonData = jData;
-                jsonDataForRef = jData;
-                candidates = jsonData.length;
-                jsonDataLoaded = true;
-                //console.log("get API inside ResumePage", jData);
+                jData.map((data) => (resumes.push(data)));
             })
             .catch( (error) => console.log(error.message) );
-
 };
 
-
-const getApplicantByApplierFor = (appliedFor) => {
-
-    jsonData = null;
-
-    fetch( JSON_SERVER_BASE_URL )
-            .then( response => {
-                return response.json();
-            })
-            .then(jData => {
-                jData.map((data) => {
-                    if(data.basics.AppliedFor.toLowerCase() === appliedFor.toLowerCase()){
-                        jsonData.push(data);
-                    }
-                } );
-                console.log(jsonData);
-                jsonData = jData;
-                jsonDataForRef = jData;
-                candidates = jsonData.length;
-                jsonDataLoaded = true;
-                //console.log("get API inside ResumePage", jData);
-            })
-            .catch( (error) => console.log(error.message) );
-
-};
 
 async function getResumeById (id) {
     var resumeByIdUrl = JSON_SERVER_BASE_URL + '/' + id;
-    const response = await fetch( resumeByIdUrl);    
+    const response = await fetch( resumeByIdUrl );    
     return await response.json();
 };
+
+const getResumeByIndex = (index) => {
+    return resumes[index];
+};
+
 
 const noResultFound = () => {
     document.getElementById('resume-data').innerHTML = ` 
@@ -191,8 +156,10 @@ const noResultFound = () => {
 }
 
 const initalResume = async () => {
-    currentApplication = await getResumeById(applicationID);
+    getAPI();
+    currentApplication = await getResumeById(resumeIndex);
     buildResume();
+    resumeIndex = 0;
 }
 
 const buildResume = () => {
