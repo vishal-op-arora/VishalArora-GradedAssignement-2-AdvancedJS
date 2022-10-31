@@ -1,20 +1,21 @@
 import { JSON_SERVER_URL as JSON_SERVER_BASE_URL } from './constants.js';
 
 let resumeIndex = 1;
-let candidates = 0;
 let currentApplication = null;
 let applicationFound = false;
-let searchBy = true;
+let searchByName = true;
 let resumes = [];
+let refResume = [];
+let appliedForResume = [];
 
 
 const resumeLandingPage = () =>  {
 
-    document.getElementById('body').innerHTML = 
+    document.getElementById('body').innerHTML =
         `
             <div id = "resume-page">
-            
-                <button type="button" id="searchBy" class="login-btn btn" style ="width:200px;">Search By Appicant Name</button>
+
+                <button type="button" id="searchBy" class="login-btn btn" style ="width:200px;">Search By Applied For</button>
                 <br>
 
                 <table style="width:100%">
@@ -22,8 +23,8 @@ const resumeLandingPage = () =>  {
                         <td style="width:20%">
                             <button type="button" id="resumePreviousBtn" class="login-btn btn" onclick="previousResume()" style ="width:200px;" hidden>Previous</button>
                         </td>
-                        
-                        
+
+
 
                         <td style="width:60%">
                             <input type="search" id="resumeFilterField" class="input-field-resume" placeholder="search with Applicant Name to filter the result">
@@ -35,17 +36,17 @@ const resumeLandingPage = () =>  {
                     </tr>
                 </table>
                 <div id="resume-data">
-                    
+
                 </div>
             </div>
-            
+
         `;
-    
+
     initalResume();
-    
+
     // Previous Button
     document.getElementById('resumePreviousBtn').onclick = async function () {
-        
+
         resumeIndex--;
         previousButton();
         nextButton();
@@ -53,56 +54,72 @@ const resumeLandingPage = () =>  {
         buildResume();
     };
 
-    // Search Field 
+    // Search Field
     document.getElementById('resumeFilterField').onchange = function (event){
 
         const filterValue = event.target.value;
-       
-        for( let i = 0; i < resumes.length; i++ ){
-            if(getResumeByIndex(i).basics.name.toLowerCase() === filterValue.toLowerCase() ){
-                currentApplication = getResumeByIndex(i);
+
+        if(!searchByName){
+            resumes = [];
+            refResume.forEach( (resume) => {
+                if(resume.basics.AppliedFor.toLowerCase() === filterValue.toLowerCase()){
+                    resumes.push(resume);
+                }
+            });
+
+            if(resumes.length !== 0 ) {
                 applicationFound = true;
-                resumeIndex = i;
-                console.log(resumeIndex);
-                break;
+                resumeIndex = 0;
+            }
+            console.log(typeof resumes);
+        }
+        else {
+            for( let i = 0; i < resumes.length; i++ ){
+                if(getResumeByIndex(i).basics.name.toLowerCase() === filterValue.toLowerCase() ){
+                    applicationFound = true;
+                    resumeIndex = i;
+                    break;
+                }
             }
         }
+
         previousButton();
         nextButton();
 
         if( applicationFound ){
+            currentApplication = getResumeByIndex(resumeIndex);
             buildResume();
             applicationFound = false;
         } else {
-            noResultFound(filterValue);
+            noResultFound();
         }
 
-        console.log(resumeIndex);
-        
         event.target.value = "";
     }
 
     // Next Button
     document.getElementById('resumeNextBtn').onclick = async function (){
-        console.log(resumes);
         resumeIndex++;
         previousButton();
         nextButton();
-        console.log(getResumeByIndex(resumeIndex));
         currentApplication = getResumeByIndex(resumeIndex);
         buildResume();
     };
 
     document.getElementById('searchBy').onclick = function () {
-        searchBy = !searchBy;
-        if(searchBy) {
-            document.getElementById('searchBy').innerText = 'Search By Appicant Name';
-            document.getElementById('resumeFilterField').setAttribute('placeholder', 'search with Applicant Name to filter the result');
-        } else {
+        searchByName = !searchByName;
+        if(searchByName) {
+            resumes = refResume;
             document.getElementById('searchBy').innerText = 'Search By Applied For';
+            document.getElementById('resumeFilterField').setAttribute('placeholder', 'search with Applicant Name to filter the result');
+
+        } else {
+            resumes = [];
+            document.getElementById('searchBy').innerText = 'Search By Appicant Name';
             document.getElementById('resumeFilterField').setAttribute('placeholder', 'search with Applied For to filter the result');
         }
-        console.log(searchBy);
+        previousButton();
+        nextButton();
     }
 
 }
@@ -125,20 +142,22 @@ const nextButton = ( ) => {
 }
 
 const getAPI = () => {
+    let fetchResumes = [];
     fetch( JSON_SERVER_BASE_URL )
             .then( response => {
                 return response.json();
             })
             .then(jData => {
-                jData.map((data) => (resumes.push(data)));
+                jData.map((data) => (fetchResumes.push(data)));
             })
             .catch( (error) => console.log(error.message) );
+    return fetchResumes;
 };
 
 
 async function getResumeById (id) {
     var resumeByIdUrl = JSON_SERVER_BASE_URL + '/' + id;
-    const response = await fetch( resumeByIdUrl );    
+    const response = await fetch( resumeByIdUrl );
     return await response.json();
 };
 
@@ -148,15 +167,16 @@ const getResumeByIndex = (index) => {
 
 
 const noResultFound = () => {
-    document.getElementById('resume-data').innerHTML = ` 
-    <div id="dataNotFound"> 
-        <img src="../../application/img/sad-face.svg" width=100px height=100px> 
-        <br>No such result found. 
+    document.getElementById('resume-data').innerHTML = `
+    <div id="dataNotFound">
+        <img src="../../application/img/sad-face.svg" width=100px height=100px>
+        <br>No such result found.
     </div>`;
 }
 
 const initalResume = async () => {
-    getAPI();
+    refResume = getAPI();
+    resumes = refResume;
     currentApplication = await getResumeById(resumeIndex);
     buildResume();
     resumeIndex = 0;
@@ -183,7 +203,7 @@ const buildResume = () => {
             </tr>
             <br>
         </table>
-    
+
     `;
 
     document.getElementById('resume-title').innerHTML = `
@@ -193,7 +213,7 @@ const buildResume = () => {
     `;
 
     document.getElementById('resume-image').innerHTML = `<img src="../../application/img/person-circle.svg" width=120px height=120px>`;
-    document.getElementById('resume-basic').innerHTML = getPersonalInformation();  
+    document.getElementById('resume-basic').innerHTML = getPersonalInformation();
     document.getElementById('resume-work').innerHTML = getWorkExperience();
     document.getElementById("technical-skills").innerHTML  = getTechnicalSkills();
     document.getElementById("achievements").innerHTML = getHobbies();
@@ -211,7 +231,7 @@ const getWorkExperience = () => {
         <span class="work-subtitle">Start Date : </span><span> ${currentApplication.work["Start Date"]}</span><br>
         <span class="work-subtitle">End Date : </span><span> ${currentApplication.work["End Date"]}</span><br>
         <span class="work-subtitle">Summary : </span><span> ${currentApplication.work.Summary}</span><br>
-    
+
     </div>
 
     <div class="work-title">Projects</div>
@@ -222,13 +242,13 @@ const getWorkExperience = () => {
     <div class="work-title">Education</div>
     <div class="work-info">
         <ul>
-            <li> 
+            <li>
                 <span class="work-subtitle">UG : </span>
                 <span>
                     ${currentApplication.education.UG.institute},
-                    ${currentApplication.education.UG.course}, 
+                    ${currentApplication.education.UG.course},
                     ${currentApplication.education.UG["Start Date"]} -
-                    ${currentApplication.education.UG["End Date"]}, 
+                    ${currentApplication.education.UG["End Date"]},
                     ${currentApplication.education.UG.cgpa} CGPA
                 </span>
             </li>
@@ -236,31 +256,31 @@ const getWorkExperience = () => {
             <li>
                 <span class="work-subtitle">Senior Secondary : </span>
                 <span>
-                    ${currentApplication.education["Senior Secondary"].institute}, 
+                    ${currentApplication.education["Senior Secondary"].institute},
                     ${currentApplication.education["Senior Secondary"].cgpa} CGPA
                 </span>
             </li>
-            
+
             <li>
                 <span class="work-subtitle">High School : </span>
                 <span>
-                    ${currentApplication.education["High School"].institute}, 
+                    ${currentApplication.education["High School"].institute},
                     ${currentApplication.education["High School"].cgpa} CGPA
                 </span>
             </li>
 
         </ul>
-        
+
         <br>
     </div>
 
     <div class="work-title">Internship</div>
     <div class="work-info">
         <ul>
-            <li><span class="work-subtitle">Company Name : </span> <span> ${currentApplication.Internship["Company Name"]}</span></li> 
-            <li><span class="work-subtitle">Position : </span><span> ${currentApplication.Internship.Position}</span></li> 
-            <li><span class="work-subtitle">Start Date : </span><span> ${currentApplication.Internship["Start Date"]}</span></li> 
-            <li><span class="work-subtitle">End Date : </span><span> ${currentApplication.Internship["End Date"]}</span></li> 
+            <li><span class="work-subtitle">Company Name : </span> <span> ${currentApplication.Internship["Company Name"]}</span></li>
+            <li><span class="work-subtitle">Position : </span><span> ${currentApplication.Internship.Position}</span></li>
+            <li><span class="work-subtitle">Start Date : </span><span> ${currentApplication.Internship["Start Date"]}</span></li>
+            <li><span class="work-subtitle">End Date : </span><span> ${currentApplication.Internship["End Date"]}</span></li>
             <li><span class="work-subtitle">Summary : </span><span> ${currentApplication.Internship.Summary}</span></li>
     </div>
 
@@ -276,18 +296,18 @@ const getWorkExperience = () => {
 }
 
 const getPersonalInformation = () => {
-    return `  
+    return `
         <div class="basic-title">Personal Information</div>
         <div class="basic-info">
             <b>Mob. </b>${currentApplication.basics.phone}<br>
             <b>eMail. </b>${currentApplication.basics.email}<br>
-            <a href=${currentApplication.basics.profiles.url}> 
+            <a href=${currentApplication.basics.profiles.url}>
                 ${currentApplication.basics.profiles.network}
             </a> <br>
-            
+
             <b>Address. </b>#${currentApplication.basics.location.address},<br>
             Pincode - ${currentApplication.basics.location.postalCode},<br>
-            ${currentApplication.basics.location.city}, 
+            ${currentApplication.basics.location.city},
             ${currentApplication.basics.location.state}<br>
         </div>
         <br>
@@ -307,7 +327,7 @@ const getPersonalInformation = () => {
 }
 
 const getTechnicalSkills = () => {
-        
+
     let techElement = "";
     let techSkills = currentApplication.skills.keywords;
     let techSkillsCount = currentApplication.skills.keywords.length
@@ -319,7 +339,7 @@ const getTechnicalSkills = () => {
 }
 
 const getAchievements = () => {
-        
+
     let achievementsElement = "";
     let achievements = currentApplication.achievements.Summary;
     let achievementsCount = currentApplication.achievements.Summary.length
@@ -331,7 +351,7 @@ const getAchievements = () => {
 }
 
 const getHobbies = () => {
-        
+
     let hobbiesElement = "";
     let hobbies = currentApplication.interests.hobbies;
     let hobbiesCount = currentApplication.interests.hobbies.length;
