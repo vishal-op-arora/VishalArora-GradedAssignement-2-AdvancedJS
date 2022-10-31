@@ -126,7 +126,7 @@ const resumeLandingPage = () =>  {
 
 
 const previousButton = () => {
-    if ( resumeIndex === 0 ){
+    if ( resumeIndex === 0 || resumes.length === 0){
         document.getElementById('resumePreviousBtn').setAttribute("hidden", "hidden");
     } else {
         document.getElementById('resumePreviousBtn').removeAttribute("hidden");
@@ -134,7 +134,7 @@ const previousButton = () => {
 }
 
 const nextButton = ( ) => {
-    if ( resumeIndex === (resumes.length - 1) ){
+    if ( resumeIndex === (resumes.length - 1) || resumes.length === 0){
         document.getElementById('resumeNextBtn').setAttribute("hidden", "hidden");
     } else {
         document.getElementById('resumeNextBtn').removeAttribute("hidden");
@@ -170,7 +170,7 @@ const noResultFound = () => {
     document.getElementById('resume-data').innerHTML = `
     <div id="dataNotFound">
         <img src="../../application/img/sad-face.svg" width=100px height=100px>
-        <br>No such result found.
+        <br>No such result found. 
     </div>`;
 }
 
@@ -216,8 +216,8 @@ const buildResume = () => {
     document.getElementById('resume-basic').innerHTML = getPersonalInformation();
     document.getElementById('resume-work').innerHTML = getWorkExperience();
     document.getElementById("technical-skills").innerHTML  = getTechnicalSkills();
-    document.getElementById("achievements").innerHTML = getHobbies();
-    document.getElementById("hobbies").innerHTML = getAchievements();
+    document.getElementById("achievements").innerHTML = getAchievements();
+    document.getElementById("hobbies").innerHTML = getHobbies();
 }
 
 const getWorkExperience = () => {
